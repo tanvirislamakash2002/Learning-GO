@@ -13,10 +13,23 @@ import "fmt"
 // 	metaInfo additionalInfo
 // }
 
+// type user struct {
+// 	name string
+// 	age  int
+// 	role string
+// }
+
+// type user struct {
+// 	name       string
+// 	age        int
+// 	isLoggedIn bool
+// 	greet      func()
+// }
+
 type user struct {
-	name string
-	age  int
-	role string
+	name       string
+	age        int
+	isLoggedIn bool
 }
 
 func main() {
@@ -42,22 +55,51 @@ func main() {
 
 	// fmt.Printf("%+v", john)
 
-	newUser := func(name string, age int, role string) user {
-		// if name == "" {
-		// 	fmt.Println("user is required")
-		// 	return user{}
-		// }
-		if age <= 0 {
-			age = 18
-		}
-		return user{
-			name: name,
-			age:  age,
-			role: role,
-		}
+	// newUser := func(name string, age int, role string) user {
+	// if name == "" {
+	// 	fmt.Println("user is required")
+	// 	return user{}
+	// }
+	// 	if age <= 0 {
+	// 		age = 18
+	// 	}
+	// 	return user{
+	// 		name: name,
+	// 		age:  age,
+	// 		role: role,
+	// 	}
+	// }
+
+	// jamal := newUser("akash", -20, "admin")
+	// fmt.Println(jamal)
+
+	// user1 := user{
+	// 	name:       "John",
+	// 	age:        25,
+	// 	isLoggedIn: false,
+	// }
+	// user1.greet = func() {
+	// 	fmt.Println("Hello", user1.name)
+	// }
+	// user1.greet()
+
+	user1 := user{
+		name:       "Akash",
+		age:        25,
+		isLoggedIn: false,
 	}
+	// pointerUser1 := &user1
+	user1.greet()
+	user1.login()
 
-	jamal := newUser("akash", -20, "admin")
-	fmt.Println(jamal)
+	fmt.Printf("%+v", user1)
+}
 
+func (u *user) login() {
+	// (*u).isLoggedIn = true
+	u.isLoggedIn = true
+}
+
+func (u user) greet() {
+	fmt.Println("Hello", u.name)
 }
