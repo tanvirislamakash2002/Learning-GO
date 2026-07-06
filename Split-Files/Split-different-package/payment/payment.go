@@ -36,7 +36,7 @@ func NewNagad(apiKey string) *Nagad {
 	}
 }
 
-func (ps PaymentService) checkout() {
+func (ps PaymentService) Checkout() {
 	ps.method.pay(100.00)
 }
 

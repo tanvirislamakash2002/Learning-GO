@@ -13,5 +13,5 @@ func main() {
 
 	MockPm := payment.MockPaymentMethod{}
 	paymentService3 := payment.NewPaymentService(MockPm)
-	paymentService3.checkout()
+	paymentService3.Checkout()
 }
