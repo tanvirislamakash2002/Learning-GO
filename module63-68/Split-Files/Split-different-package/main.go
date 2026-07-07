@@ -1,6 +1,6 @@
 package main
 
-import "learnGO/Split-Files/Split-different-package/payment"
+import "learnGO/module63-68/Split-Files/Split-different-package/payment"
 
 func main() {
 	// bkash := Bkash{apiKey: "4343hjkjj"}
