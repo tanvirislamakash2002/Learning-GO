@@ -23,4 +23,18 @@ func main() {
 		fmt.Println("Error", err)
 	}
 	fmt.Println(string(rawJson))
+
+	var p2 person
+
+	jsonText := `{"personName":"Akash","city":"Dhaka"}`
+
+	error := json.Unmarshal([]byte(jsonText), &p2)
+	if error != nil {
+		fmt.Println("Error", err)
+	}
+
+	fmt.Println(p2.Age)
+	fmt.Println(p2.Name)
+	fmt.Println(p2.City)
+
 }
