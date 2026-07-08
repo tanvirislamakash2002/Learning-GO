@@ -8,6 +8,8 @@ import (
 
 var wg sync.WaitGroup
 
+var fileUrl string
+
 func main() {
 
 	var start = time.Now()
@@ -24,6 +26,7 @@ func main() {
 
 	// time.Sleep(3 * time.Second)
 	wg.Wait() // waiting .... until counter is 0
+	fmt.Println("file url", fileUrl)
 	fmt.Println("All tasks completed")
 	fmt.Println("time taken", time.Since(start))
 }
@@ -33,6 +36,9 @@ func uploadFile() {
 	fmt.Println("Uploading file...")
 	time.Sleep(3 * time.Second)
 	fmt.Println("File upload done!")
+	fileUrl = "https://s3/sdsfd.png"
+	// return fileUrl
+
 	// wg.Add(-1)
 	// wg.Done()
 
