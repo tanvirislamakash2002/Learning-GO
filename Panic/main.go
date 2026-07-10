@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 func doSomething() {
 	defer func() {
@@ -13,8 +16,15 @@ func doSomething() {
 	panic("something really bad happen")
 }
 
+func doAnotherThing() {
+	defer func() {
+		fmt.Println("Differ function ran!")
+	}()
+	log.Fatal("Something Very Big Happened")
+}
 func main() {
-	doSomething()
+	// doSomething()
+	doAnotherThing()
 
 	fmt.Println("main complete normally")
 }
