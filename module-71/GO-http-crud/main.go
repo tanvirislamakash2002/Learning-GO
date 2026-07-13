@@ -119,6 +119,32 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 func getUsersHandler(w http.ResponseWriter, r *http.Request) {
+
+	query := `select id, username, age, email from users`
+	rows, err := db.Query(context.Background(), query)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Could not get users")
+		return
+	}
+
+	defer rows.Close()
+
+	var users []User
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.Id, &user.Name, &user.Age, &user.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, "Could not scan user")
+			return
+		}
+		users = append(users, user)
+
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	// users, _ := json.Marshal(users)
 	// w.Write(users)
