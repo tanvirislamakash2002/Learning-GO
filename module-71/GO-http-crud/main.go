@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 )
 
@@ -37,6 +38,7 @@ func main() {
 	mux.HandleFunc("GET /users", getUsersHandler)
 	mux.HandleFunc("GET /users/{id}", getSingleUsersHandler)
 	mux.HandleFunc("PUT /users/{id}", updateUserHandler)
+	mux.HandleFunc("DELETE /users/{id}", deleteUserHandler)
 
 	fmt.Println("Server is running at port 5000")
 	err := http.ListenAndServe(":5000", mux)
@@ -116,6 +118,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "Invalid user id")
+		return
 	}
 
 	var updatedUser User
@@ -134,6 +137,30 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(updatedUser)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintln(w, "User not found")
+}
+
+func deleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	idParam := r.PathValue("id")
+	// fmt.Printf("the value or id is %v and the type of the id is %T", idParam, idParam)
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, "Invalid user id")
+		return
+	}
+
+	for idx, user := range users {
+		if user.Id == id {
+			// users = append(users[:idx], users[idx+1:]...)
+
+			users = slices.Delete(users, idx, idx+1)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 	}
