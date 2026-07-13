@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type User struct {
@@ -30,7 +33,27 @@ var users = []User{
 	},
 }
 
+var db *pgx.Conn
+
+func connectDb() {
+	var err error
+	connStr := "postgres://postgres:akash123@localhost:5432/go_crud"
+
+	db, err = pgx.Connect(context.Background(), connStr)
+	if err != nil {
+		panic(err)
+		// fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		// os.Exit(1)
+	}
+
+	fmt.Println("Database connected successfully")
+}
+
 func main() {
+
+	connectDb()
+
+	defer db.Close(context.Background())
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", rootHandler)
 	mux.HandleFunc("GET /health", healthHandler)
@@ -73,8 +96,22 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(newUser)
 
-	newUser.Id = len(users) + 1
-	users = append(users, newUser)
+	// newUser.Id = len(users) + 1
+	// users = append(users, newUser)
+
+	query := `
+	insert into users (username, age, email)
+	values ($1, $2, $3)
+	returning id
+	`
+
+	err = db.QueryRow(context.Background(), query, newUser.Name, newUser.Age, newUser.Email).Scan(&newUser.Id)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Could not create user")
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
