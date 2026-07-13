@@ -145,6 +145,13 @@ func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	err = rows.Err()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Could not read user")
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	// users, _ := json.Marshal(users)
 	// w.Write(users)
@@ -193,18 +200,19 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for idx, user := range users {
-		if user.Id == id {
-			updatedUser.Id = id
-			users[idx] = updatedUser
+	query := `
+	update users
+	set username = $1, age = $2, email = $3
+	where id = $4
+	returning id, name, age, email
+	`
+	err = db.QueryRow(context.Background(), query, updatedUser.Name, updatedUser.Age, updatedUser.Email, id).Scan(&updatedUser.Id, &updatedUser.Name, &updatedUser.Age, &updatedUser.Email)
 
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(updatedUser)
-			return
-		}
+	if err == pgx.ErrNoRows {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, "user not found")
+		return
 	}
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintln(w, "User not found")
 }
 
 func deleteUserHandler(w http.ResponseWriter, r *http.Request) {
