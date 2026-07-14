@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"slices"
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
@@ -204,7 +203,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	update users
 	set username = $1, age = $2, email = $3
 	where id = $4
-	returning id, name, age, email
+	returning id, username, age, email
 	`
 	err = db.QueryRow(context.Background(), query, updatedUser.Name, updatedUser.Age, updatedUser.Email, id).Scan(&updatedUser.Id, &updatedUser.Name, &updatedUser.Age, &updatedUser.Email)
 
@@ -213,6 +212,15 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "user not found")
 		return
 	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "1Could not  update user")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedUser)
 }
 
 func deleteUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -226,15 +234,30 @@ func deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for idx, user := range users {
-		if user.Id == id {
-			// users = append(users[:idx], users[idx+1:]...)
+	// for idx, user := range users {
+	// 	if user.Id == id {
+	// 		// users = append(users[:idx], users[idx+1:]...)
 
-			users = slices.Delete(users, idx, idx+1)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	// 		users = slices.Delete(users, idx, idx+1)
+	// 		w.WriteHeader(http.StatusNoContent)
+	// 		return
+	// 	}
+	// }
+
+	query := `delete from users where id = $1`
+	cmdTag, err := db.Exec(context.Background(), query, id)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Could not delete user")
+		return
 	}
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintln(w, "User not found")
+
+	if cmdTag.RowsAffected() != 1 {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, "user not found")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	fmt.Fprintln(w, "User deleted successfully")
 }
